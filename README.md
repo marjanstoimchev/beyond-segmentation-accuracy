@@ -13,13 +13,13 @@
 [![Python](https://img.shields.io/badge/python-3.10%2B-blue.svg)](https://www.python.org/)
 [![PyTorch Lightning](https://img.shields.io/badge/PyTorch-Lightning-792ee5.svg)](https://lightning.ai/)
 
-<table align="center" border="0">
-  <tr>
-    <td align="center" valign="middle"><a href="https://neurips.cc/virtual/2026/workshop/137513"><img src="media/neurips_logo.svg" alt="NeurIPS" height="72"></a></td>
-    <td align="center" valign="middle" width="36"></td>
-    <td align="center" valign="middle"><a href="https://asci.artificialintelligencepathology.org/"><img src="media/asci_logo.png" alt="ASCI workshop" height="92"></a></td>
-  </tr>
-</table>
+<a href="https://asci.artificialintelligencepathology.org/">
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset="media/venue_dark.png">
+  <img src="media/venue_light.png" alt="NeurIPS 2026 · ASCI workshop" width="520">
+</picture>
+</a>
+
 <sub>Accepted at the NeurIPS 2026 Workshop on <b>AI at Scale for Clinical Impact: Cancer Pathology Foundation Models (ASCI)</b>, Sydney, December 2026 · <a href="https://openreview.net/forum?id=mD2Cb5rqWd">OpenReview</a></sub>
 
 [Quick start](docs/QUICKSTART.md) ·

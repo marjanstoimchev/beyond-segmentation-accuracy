@@ -34,7 +34,7 @@ sam2 = ["SAM-2", "torchvision"]
 sam3 = ["transformers>=5", "torchvision", "Pillow"]
 kodiak = ["torch>=2.1", "lightning>=2.4", "torchvision", "Pillow", "tensorboard"]   # KODIAK pretraining (src/kodiak + vendored src/dinov3)            # SAM 3 (facebook/sam3 via HF) — self-contained in mxseg.baselines._sam3_model                                               # zero-shot baseline; install from the local clone: pip install -e segment-anything-2
 notebooks = ["matplotlib>=3.7", "jupyter", "nbformat", "nbconvert", "ipykernel"]
-dev = ["pytest>=7.0", "ruff>=0.4"]
+dev = ["pytest>=7.0", "ruff>=0.4", "matplotlib>=3.7", "tomli>=2.0; python_version < '3.11'"]   # matplotlib: the figure tests; tomli: tests read pyproject on 3.10
 all = ["mxdata[torch,baselines,train,notebooks,dev]"]
 
 [project.scripts]

@@ -1,0 +1,60 @@
+# The dataset: which slides, which channels, how patches are cut, how intensities are normalized, how regions are split.
+# One extraction (`make data` = `mxdata sample -c configs/dataset.yaml`) -> $MXDATA_ROOT/dataset: every marker of every patch,
+# labeled (complete mask + confirmed-cells mask + cells.csv) and unlabeled. KODIAK pretrains on all of it; the segmenters read
+# only the DAPI + LAP2 files of the labeled patches (their `input:` block); the analysis reads the rest.
+# Adding a slide: put its folder under $MXDATA_ROOT (OME-TIFFs + HALO_layers_<id> + QC_for_slide-<id>), list it under
+# `slides`, add its held-out regions under `split`, run `mxdata sample` again (resumable; the split is re-assigned).
+# Environment config never lives here: MXDATA_ROOT = folder holding SLIDE-*/ (default ~/Desktop/MedAI/Data/mxdata).
+
+slides: [SLIDE-0235, SLIDE-0236, SLIDE-0233]
+markers: [DAPI, LAP2, PanCK, CD45, CD3, CD4, CD8, FOXP3, uPAR]   # every channel of the panel, stored per patch (configs/panel.yaml names their roles)
+level: 0                   # full resolution: nuclei resolve
+regions: null              # null = every HALO region layer of every slide
+
+mode: supervised
+qc_policy: ignore_wrong    # keep_all | ignore_wrong | drop_wrong   (docs/DATA.md)
+min_area_px: 20.0          # contours below this area are TINY artefacts and never enter a mask
+
+patches:
+  size: 256
+  stride: 192              # labeled grid: 64 px overlap so every border nucleus is whole in some patch; each patch owns its stride core
+  min_fg: 0.02             # labeled: keep a window if >= 2 % of its pixels are nuclei
+  unlabeled: true          # tissue outside the annotated regions, image only: the self-supervised stream
+  #   WARNING: SLIDE-0233 was sampled with this false, on purpose -- it is a TEST slide and its tissue must never
+  #   enter the pretraining stream. Re-running `mxdata sample` with it true WILL extract its unlabeled bands.
+  unlabeled_stride: 128    # half-overlapping windows: 4x the views for pretraining (nothing is stitched from them)
+  min_tissue: 0.5          # unlabeled: keep a window if >= 50 % of it is tissue (Otsu mask on a DAPI thumbnail)
+  tissue_max_dim: 2048
+  tissue_marker: DAPI
+  max_unlabeled_per_slide: null
+  rows_per_unit: 8
+  seed: 0
+
+normalization:             # one (lo, hi) per marker per slide from a seeded pixel sample of the annotated regions, stored in
+  mode: slide              # <slide>/stats.json — the single source every network input is scaled with
+  pmin: 1.0
+  pmax: 99.7
+  sample_pixels: 2000000
+  seed: 0
+
+split:                     # by region; overlapping regions are never separated. Region ids are per slide.
+  val_frac: 0.25           # used only when nothing is pinned for a slide
+  seed: 0
+  # Leave-slide-out. SLIDE-0235 is the development slide (pretraining, training, checkpoint selection); SLIDE-0236 is the
+  # test slide, held out at every stage and reported once: all six of its regions are expert-reviewed.
+  val_regions:             # checkpoint selection: two reviewed regions of the development slide
+    SLIDE-0235: [15, 14]   #   both stand alone (12 would pull its overlap chain 6-9, 11 into val)
+  test_regions: null
+  val_slides: null
+  test_slides: [SLIDE-0236, SLIDE-0233]   # 0233 is the second test slide: held out at every stage, scored once
+  require_qc: false
+
+augment:
+  flip: true
+  rot90: true
+
+loader:
+  batch_size: 8
+  num_workers: 0
+  pin_memory: false
+  seed: 0

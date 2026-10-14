@@ -1,0 +1,43 @@
+# Baseline 1: Cellpose-DINOv3 (`cpdino-vitb`) fine-tuned on our labels with Lightning (`mxseg train -c configs/train_cellpose.yaml`).
+# The row of record for cell-specific pretraining. Cellpose's DINOv3 ViT-B/16 checkpoint starts from the same DINOv3 lineage and the
+# same LVD-1689M pretraining as the dinov3_flows row, with cellpose's large-scale supervised cell training on top — so against KODIAK
+# it isolates "supervised cell corpora vs slide self-supervision" at a comparable encoder size (86M vs 22M), not 304M vs 22M.
+# FULL fine-tune (all 12 blocks + final norm + readout; cellpose reads patch_embed.proj.weight.data, so the patch embedding never
+# takes a gradient) under the shared supervised protocol of every trained model: same patches, D4 draws, marker input, 20 epochs,
+# effective batch 16, ignore mask, minimum-val/loss weights, and the one optimizer recipe below, unchanged.
+# cpsam_v2 (ViT-L, 304M) stays the zero-shot row (configs/baselines/cellpose.yaml): full fine-tuning it needs ~12 GB of activations at
+# micro-batch 4 and swaps on an 18 GB machine, and its head-only variant trains a single 1x1 conv — 49k parameters against the ViT
+# segmenters' 2.15M UNETR decoder — so that variant is a linear probe, never the row Cellpose is judged by.
+# Unknown keys are rejected. Data (slides, split, qc rules) comes from the mxdata config below.
+name: cellpose_ft
+data: configs/dataset.yaml
+dataset_dir: null            # default: $MXDATA_ROOT/dataset
+model: cellpose
+input:                         # what the network sees (mxseg/inputs.py): the two channels the reference boundaries were drawn from,
+  red: LAP2                    #   nuclear envelope and nuclei, on the dataset's stored slide statistics; the third channel stays blank
+  green: null
+  blue: DAPI
+optim:                         # THE optimizer recipe, identical for every trained model (mxseg/train/module.py)
+  lr: 2.0e-3                   # peak lr: the new decoder / head; a pretrained encoder layer i of L trains at lr * 0.75^(L + 1 - i)
+  layerwise_decay: 0.75        # ViT fine-tuning best practice, applied to every pretrained encoder (ViT blocks, ResNet stages)
+  weight_decay: 0.05           # on >= 2-D parameters only (no decay on biases, norms, tokens)
+  warmup_epochs: 2             # linear warm-up, then cosine decay towards final_lr_fraction * lr over the remaining epochs
+  final_lr_fraction: 0.01
+cellpose:
+  variant: cpdino-vitb       # start weights: a cellpose model name (cpdino-vitb | cpdino | cpsam_v2 | cpsam) or a .pt path
+  rdrop: 0.4                 # cellpose's stochastic depth while training (its own full-fine-tune value; 0 with the encoder frozen)
+  train_blocks: 12           # ViT blocks trained from the top: 12 = full fine-tune of cpdino-vitb (ViT-B has 12; cpsam ViT-L has 24),
+  #                            4 = last 4 + top module + head, 0 = readout head only (a linear probe, not an adaptation)
+epochs: 20
+batch_size: 4                # 256² patches through the ViT: micro-batches of 4 ...
+grad_accumulation: 4         # ... x 4 = the shared effective batch of 16 per optimizer step
+num_workers: 0
+accelerator: auto            # auto | mps | cuda | cpu
+precision: 32-true           # bf16-mixed on CUDA
+seed: 0
+augment: {flip: true, rot90: true}    # D4 with flow vectors transformed accordingly
+val:
+  every_n_epochs: 1          # instance metrics (real cellpose inference on val patches) every epoch, like every trained model
+  n_metric_patches: 40       # null = all val patches
+  monitor: val/loss          # the kept weights = the epoch with the minimum validation loss — one rule for every trained model
+out: runs                    # runs/<name>/

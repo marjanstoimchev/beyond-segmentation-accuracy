@@ -1,0 +1,15 @@
+# Baseline 0 — pretrained Cellpose-SAM v2, zero-shot.       mxseg eval -b configs/baselines/cellpose.yaml [--split test] [--unit region]
+# This file IS the run's definition: every constructor argument spelled out; `--param key=value` overrides on top.
+baseline: cellpose
+name: cellpose
+params:
+  variant: cpsam_v2          # pretrained weights (a cellpose model name or a runs/<name>/weights.pt path)
+  diameter: null             # null = cellpose estimates it
+  flow_threshold: 0.4
+  cellprob_threshold: 0.0
+  gpu: true
+  batch_size: 8
+input:                     # THE SHARED PROTOCOL INPUT: the same marker image every trained row sees (mxseg/inputs.py),
+  red: LAP2                #   on the slide's stored statistics. Zero-shot and prompted rows now differ from the trained
+  green: null              #   ones only in that they were never trained -- not in what they are shown.
+  blue: DAPI

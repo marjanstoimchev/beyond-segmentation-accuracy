@@ -1,0 +1,110 @@
+# KODIAK continued pretraining at ViT-B/16 (85.7M) — the size-matched partner of cellpose's cpdino-vitb.
+# Identical to configs/kodiak_pretrain.yaml except the encoder (768 dim / 12 heads), its DINOv3 initialization, and the
+# run folder (runs_v2/, so runs/kodiak_mxif and every result derived from it are untouched).
+# ~4x ViT-S per step: the ViT-S run did 100 epochs in ~10.5 h on an M3 Pro, so budget ~40 h.
+#   python -m kodiak.pretrain -c configs/kodiak_pretrain_vitb.yaml
+# KODIAK continued pretraining on the MxIF patches (DINOv3 ViT-S/16 initialization)
+# =============================================================================
+# The recommended parameters of the reference implementation (its continued-pretraining
+# configuration), with the data section pointing at this repository's fixed patch dataset:
+# all kept patches (labeled + unlabeled), labels never used.
+#
+#   python -m kodiak.pretrain --config configs/kodiak_pretrain.yaml
+# =============================================================================
+
+experiment:
+  name: "kodiak_mxif_vitb"       # LAP2 · random marker · DAPI pretraining on every training patch of the dataset
+  out: "runs_v2"                 # parent folder of the run: <out>/<name>/ (--out overrides). The ViT-S run stays in runs/kodiak_mxif
+  seed: 42
+
+data:
+  dataset_dir: null            # null = $MXDATA_ROOT/dataset (configs/dataset.yaml): every kept patch of the training split, labels never read
+  input:                       # what the encoder sees (mxseg/inputs.py): fixed nuclear envelope (red) and nuclei (blue) — the channels the
+    red: LAP2                  # reference boundaries were drawn from — and a context marker drawn into green ONCE PER SAMPLE (shared by every
+    blue: DAPI                 # crop of the sample, so the cross-view objectives compare views that agree), weights below; blank = no third marker
+    green: {PanCK: 0.25, CD45: 0.2, CD3: 0.1, CD4: 0.1, CD8: 0.1, uPAR: 0.1, FOXP3: 0.05, blank: 0.1}
+  batch_size: 8               # ViT-S run used 16. 5028 train patches -> 629 steps/epoch (was 314). `lr_scaling: null`
+  #                             below means learning_rate is NOT rescaled for this: it stays 1.0e-4 per step.
+  num_workers: 4
+  pin_memory: false
+  augmentation:
+    photometric: mxif          # marker-image photometrics: per-channel gain / gamma + blur (dino = the natural-image color jitter / grayscale /
+    gain: 0.3                  # solarize of the reference implementation, for ablation). Geometry is the method's multi-crop recipe.
+    gamma: [0.7, 1.4]
+    blur_p: 0.3
+    flips: true
+    rot90: true
+    global_crops_scale: [0.32, 1.0]
+    global_crops_size: 256
+    local_crops_number: 4      # halved from the recommended 8: ~25% faster per step on a Mac
+    local_crops_size: 96         # ViT-S run used 112 (7x7 tokens); 96 = 6x6, ~27% fewer local tokens per step
+    local_crops_scale: [0.05, 0.32]
+    normalize_mean: [0.485, 0.456, 0.406]
+    normalize_std: [0.229, 0.224, 0.225]
+model:                         # THE ENCODER. Whatever is set here must be repeated in the `kodiak:` block of the fine-tuning
+  #                              config that consumes this run's checkpoint (configs/train_kodiak.yaml), which uses the same key
+  #                              names. ViT-B/16: pretrained_path -> weights/dinov3_vitb16_pretrain_lvd1689m-73cec8be.pth,
+  #                              vit_embed_dim: 768, vit_heads: 12 — everything else unchanged. ViT-B is ~4x ViT-S per step:
+  #                              100 epochs took ~10.5 h at ViT-S on an M3 Pro, so budget ~40 h.
+  pretrained_path: "weights/dinov3_vitb16_pretrain_lvd1689m-73cec8be.pth"
+  image_size: 256
+  vit_patch_size: 16
+  vit_embed_dim: 768           # ViT-S: 384
+  vit_depth: 12
+  vit_heads: 12                # ViT-S: 6
+  vit_mlp_ratio: 4.0
+  num_storage_tokens: 4
+  drop_path_rate: 0.1
+  num_prototypes: 128
+  projector_dim: 256
+  decoder_dim: 192
+  decoder_depth: 4
+  decoder_heads: 6             # 192 / 6 = 32-wide heads, as in the ViT-S run; 12 would make them 16-wide, not wider
+  freeze_backbone: false
+  backbone_lr_scale: 1.0
+  compile_model: false
+  mask_sample_probability: 0.5
+  mask_ratio_min_max: [0.1, 0.5]
+  mask_padded_keys: true       # the masked student attends over its real visible tokens only (MAE-style, as described);
+                               # false = the reference implementation, whose padding let copies of one visible token act as extra keys
+
+loss:
+  teacher_temp: 0.04
+  center_momentum: 0.9
+  sinkhorn_iters: 3
+  koleo_loss_weight: 0.1
+  koleo_distributed: false
+  prototype_cls_loss_weight: 1.0
+  prototype_cls_student_temp: 0.1
+  prototype_cls_teacher_temp: 0.04
+  n_local_crops: 4
+
+optimizer:
+  learning_rate: 1.0e-4
+  min_lr: 1.0e-6
+  lr_scaling: null
+  weight_decay: 0.04
+  weight_decay_end: 0.4
+  warmup_epochs: 5
+  freeze_last_layer_epochs: 3
+  layerwise_decay: 0.9
+  patch_embed_lr_mult: 0.2
+  adamw_beta1: 0.9
+  adamw_beta2: 0.999
+  dino_head_wd_multiplier: 1.0
+  ema_momentum: 0.996
+  ema_momentum_end: 1.0
+  teacher_temp_warmup: 0.04
+  teacher_temp: 0.07
+  teacher_temp_warmup_epochs: 10
+
+training:
+  max_epochs: 100              # pretraining budget; every schedule (lr, wd, EMA, teacher temp) stretches to this length
+  gradient_clip_val: 3.0
+  accumulate_grad_batches: 1
+  precision: "bf16-mixed"      # mixed precision on CUDA; on MPS it runs but is measured no faster than 32-true (no low-precision GEMM acceleration), so the code falls back to 32-true for exact numerics
+  check_val_every_n_epoch: null   # null = no validation during pretraining; N = SSL loss on the 80 val patches every N epochs
+  checkpoint:
+    save_last: true
+    save_top_k: -1
+    every_n_epochs: 25

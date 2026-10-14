@@ -1,0 +1,11 @@
+units: fraction of the slide's stats.json window (lo = 1st, hi = 99.7th percentile)
+calibrated_on: SLIDE-0235_Final_x8192_y3072_l0 tags
+calibrated:
+  PanCK: 0.0179
+  CD3: 0.1946
+  CD4: 0.3961
+  CD8: 0.1517
+provisional_mixture_no_tags:
+  uPAR: 0.189
+  FOXP3: 0.133
+  CD45: 0.0457

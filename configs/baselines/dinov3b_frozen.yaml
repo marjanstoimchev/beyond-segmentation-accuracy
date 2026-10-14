@@ -1,0 +1,15 @@
+# DINOv3 ViT-B/16, ENCODER FROZEN — only the UNETR head trains (the representation probe at ViT-B, the
+# size-matched partner of the ViT-S dinov3_frozen row). Encoder from the raw DINOv3 ViT-B/16 foundation (no slide pretraining).
+# Train: scripts/finetune_all.sh dinov3b_frozen
+# then:  mxseg eval -b configs/baselines/dinov3b_frozen.yaml [--split test] [--unit region]
+baseline: kodiak
+name: dinov3b_frozen
+params:
+  weights: runs/dinov3b_frozen/weights.pt    # min-val/loss weights; the architecture (768d, 12 heads) is stored inside and read back
+  min_area: 15
+  batch_size: 8
+  device: null                              # null = cuda | mps | cpu, auto-detected
+input:                                      # the training input (stored with the weights, which win): LAP2 red, blank, DAPI blue
+  red: LAP2
+  green: null
+  blue: DAPI

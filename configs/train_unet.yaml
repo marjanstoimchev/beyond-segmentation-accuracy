@@ -1,0 +1,36 @@
+# Baseline 2: 3-class U-Net (background / nucleus / boundary -> watershed instances).  `mxseg train -c configs/train_unet.yaml`
+# Same data as every other model: same split, same patches, same augmentation draws (seed) — see runs/<name>/data_manifest.json.
+name: unet_flows
+data: configs/dataset.yaml
+model: unet
+input:                         # what the network sees (mxseg/inputs.py): the two channels the reference boundaries were drawn from,
+  red: LAP2                    #   nuclear envelope and nuclei, on the dataset's stored slide statistics; the third channel stays blank
+  green: null
+  blue: DAPI
+optim:                         # THE optimizer recipe, identical for every trained model (mxseg/train/module.py)
+  lr: 2.0e-3                   # peak lr: the new decoder / head; a pretrained encoder layer i of L trains at lr * 0.75^(L + 1 - i)
+  layerwise_decay: 0.75        # ViT fine-tuning best practice, applied to every pretrained encoder (ViT blocks, ResNet stages)
+  weight_decay: 0.05           # on >= 2-D parameters only (no decay on biases, norms, tokens)
+  warmup_epochs: 2             # linear warm-up, then cosine decay towards final_lr_fraction * lr over the remaining epochs
+  final_lr_fraction: 0.01
+unet:
+  encoder: resnet34            # any segmentation_models_pytorch encoder
+  encoder_weights: imagenet    # null = train from scratch
+  objective: flows             # the Cellpose protocol (flow field -> follow flows): +0.087 val/f1 over threeclass, measured
+  boundary_px: 2               # boundary class = the 2 outermost pixels of every nucleus (incl. the contact line between touching nuclei)
+  dice_weight: 1.0             # loss = masked cross-entropy + dice_weight * masked soft Dice (nucleus + boundary classes)
+  min_area: 15                 # drop instances under 15 px after the watershed
+epochs: 20
+batch_size: 16
+num_workers: 0
+accelerator: auto              # auto | mps | cuda | cpu
+precision: 32-true
+seed: 0
+augment:
+  flip: true
+  rot90: true
+val:
+  every_n_epochs: 1            # U-Net inference is cheap: instance metrics (and the checkpoint) every epoch
+  n_metric_patches: 40
+  monitor: val/loss           # the kept weights = the epoch with the minimum validation loss — one rule for every trained model
+out: runs

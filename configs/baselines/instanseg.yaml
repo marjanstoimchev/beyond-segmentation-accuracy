@@ -1,0 +1,4 @@
+# Pretrained InstanSeg (fluorescence, channel-invariant), zero-shot.   mxseg eval -b configs/baselines/instanseg.yaml
+baseline: instanseg
+name: instanseg
+params: {}

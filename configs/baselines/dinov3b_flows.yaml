@@ -1,0 +1,15 @@
+# DINOv3 ViT-B/16 (85.7M) + UNETR head, fine-tuned with the Cellpose flow objective — the size-matched
+# partner of cellpose_ft (cpdino-vitb, also a DINOv3 ViT-B). Encoder starts from the raw DINOv3 ViT-B/16 foundation (no slide pretraining).
+# Train: scripts/finetune_all.sh dinov3b_flows
+# then:  mxseg eval -b configs/baselines/dinov3b_flows.yaml [--split test] [--unit region]
+baseline: kodiak
+name: dinov3b_flows
+params:
+  weights: runs/dinov3b_flows/weights.pt   # min-val/loss weights; the ARCHITECTURE (768d, 12 heads) is stored inside and read back
+  min_area: 15
+  batch_size: 8                            # ViT-B at 8 px/token: half the ViT-S batch
+  device: null                             # null = cuda | mps | cpu, auto-detected
+input:                                     # the training input (stored with the weights, which win): LAP2 red, blank, DAPI blue
+  red: LAP2
+  green: null
+  blue: DAPI

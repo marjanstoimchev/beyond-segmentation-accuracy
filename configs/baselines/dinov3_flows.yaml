@@ -1,0 +1,16 @@
+# DINOv3 baseline — the same segmenter as kodiak_flows.yaml but the encoder starts from the raw DINOv3 ViT-S/16
+# foundation weights (no slide pretraining). The controlled partner of the KODIAK rows: encoder init is the only variable.
+# Train: mxseg train -c configs/train_kodiak.yaml --set kodiak.checkpoint=weights/dinov3_vits16_pretrain_lvd1689m-08c60483.pth \
+#            --set kodiak.objective=flows --name dinov3_flows
+# then:  mxseg eval -b configs/baselines/dinov3_flows.yaml [--split test] [--unit region]
+baseline: kodiak
+name: dinov3_flows
+params:
+  weights: runs/dinov3_flows/weights.pt   # min-val/loss weights (init recorded in meta as "dinov3")
+  min_area: 15
+  batch_size: 16
+  device: null                            # null = cuda | mps | cpu, auto-detected
+input:                                    # the training input (stored with the weights, which win): LAP2 red, blank, DAPI blue
+  red: LAP2
+  green: null
+  blue: DAPI

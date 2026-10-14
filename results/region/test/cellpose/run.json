@@ -1,0 +1,99 @@
+{
+  "name": "cellpose",
+  "baseline": "cellpose",
+  "params": {
+    "variant": "cpsam_v2",
+    "diameter": null,
+    "flow_threshold": 0.4,
+    "cellprob_threshold": 0.0
+  },
+  "device": "mps",
+  "input": {
+    "channels": [
+      "LAP2",
+      null,
+      "DAPI"
+    ],
+    "norms": {
+      "SLIDE-0235": {
+        "LAP2": [
+          88.0,
+          8889.0
+        ],
+        "DAPI": [
+          132.0,
+          5126.003000000026
+        ]
+      },
+      "SLIDE-0236": {
+        "LAP2": [
+          4.0,
+          8263.0
+        ],
+        "DAPI": [
+          124.0,
+          5543.0
+        ]
+      },
+      "SLIDE-0233": {
+        "LAP2": [
+          173.0,
+          9281.0
+        ],
+        "DAPI": [
+          183.0,
+          5896.0
+        ]
+      }
+    }
+  },
+  "split": "test",
+  "unit": "region",
+  "require_qc": false,
+  "n_regions": 10,
+  "n_regions_qc": 10,
+  "slides": [
+    "SLIDE-0235",
+    "SLIDE-0236",
+    "SLIDE-0233"
+  ],
+  "regions": [
+    1,
+    1,
+    2,
+    2,
+    3,
+    3,
+    4,
+    4,
+    5,
+    6
+  ],
+  "tile": {
+    "size": 256,
+    "stride": 192,
+    "stitching": "objects owned by the tile whose core holds their centroid"
+  },
+  "ground_truth": {
+    "scored": "every nucleus of the region (one ground-truth map per region)",
+    "ignored": "QC-Wrong nuclei",
+    "n_gt_scored": 8481,
+    "n_wrong_ignored": 2627
+  },
+  "dataset": "/Users/marjan/Desktop/MedAI/Data/mxdata/dataset",
+  "dataset_created": "2026-10-13T12:44:07",
+  "dataset_format": 2,
+  "predictions": "outputs/region/test/cellpose",
+  "figures": "outputs/figures/region/test",
+  "seconds": 410.7037003040314,
+  "finished_at": "2026-10-14T09:56:55",
+  "versions": {
+    "mxseg": "0.1.0",
+    "python": "3.12.7",
+    "platform": "macOS-15.5-arm64-arm-64bit",
+    "mxdata": "0.3.0",
+    "torch": "2.7.1",
+    "cellpose": "4.2.1.1",
+    "instanseg": "?"
+  }
+}

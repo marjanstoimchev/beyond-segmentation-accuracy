@@ -1,0 +1,40 @@
+# The marker panel of the slides: what each channel is, how it is drawn in figures, and how cells are phenotyped.
+# Every slide of the dataset carries these markers (configs/dataset.yaml lists which are stored).
+
+nuclear: DAPI              # nuclei — the blue channel of every network input
+envelope: LAP2             # nuclear envelope — the red channel; DAPI + LAP2 are the channels the reference boundaries were drawn from
+
+markers:                   # role and display color (figures / composites only; networks never see colors, only channels)
+  DAPI:  {role: nuclei,             color: "#4A6CFF"}
+  LAP2:  {role: nuclear envelope,   color: "#00E5FF"}
+  PanCK: {role: epithelium,         color: "#5AFF5A"}
+  CD45:  {role: immune,             color: "#FF5A5A"}
+  CD3:   {role: T cell,             color: "#FFA500"}
+  CD4:   {role: helper T cell,      color: "#FFE14A"}
+  CD8:   {role: cytotoxic T cell,   color: "#B36BFF"}
+  FOXP3: {role: regulatory T cell,  color: "#FF1493"}
+  uPAR:  {role: uPAR,               color: "#FF8C42"}
+
+# Phenotypes as the biologist defined them: one marker each (cell name -> marker); `parent` makes the hierarchy explicit
+# (a CD4+ T cell is a T cell that is also CD4+). A cell takes the deepest phenotype whose whole ancestor chain is positive
+# for its markers; with none positive it is "Other". `lineage` (the root of the chain) is what neighborhoods and niches use.
+phenotypes:
+  - {name: Epithelial,        marker: PanCK}
+  - {name: uPAR+ epithelial,  marker: uPAR,  parent: Epithelial}
+  - {name: T cell,            marker: CD3}
+  - {name: Treg,              marker: FOXP3, parent: T cell}         # FOXP3+ T cells (the biologist's Treg sessions box FOXP3+ CD3+ cells); listed
+                                                                     #   before CD8+/CD4+ so a FOXP3+ cell is a Treg whatever else it carries
+  - {name: CD8+ T cell,       marker: CD8,   parent: T cell}
+  - {name: CD4+ T cell,       marker: CD4,   parent: T cell}
+  - {name: Immune,            marker: CD45}                         # CD45+ cells that are not T cells (other immune)
+
+gates:                     # per-marker positivity thresholds in SLIDE-NORMALIZED units — the fraction of the slide's stats.json window
+                           # (lo = 1st, hi = 99.7th percentile), the scale every network input uses — so one set of gates applies to any
+                           # slide (mxseg.analysis.phenotype_gates(..., norms=...) converts to raw counts). Set by scripts/calibrate_gates.py:
+  CD3:   0.1408            # calibrated 2026-10-14 on the R11/R12 boxes + W1 tags of SLIDE-0235 (86 tagged nuclei); leave-one-area-out F1 0.83
+  CD4:   0.4030            # calibrated 2026-10-14 on the R11/R12 boxes + W1 tags of SLIDE-0235 (31 tagged nuclei); leave-one-area-out F1 0.74
+  CD8:   0.0966            # calibrated 2026-10-14 on the R11/R12 boxes + W1 tags of SLIDE-0235 (35 tagged nuclei); leave-one-area-out F1 0.72
+  PanCK: 0.0557            # calibrated 2026-10-14 on the R11/R12 boxes + W1 tags of SLIDE-0235 (822 tagged nuclei); leave-one-area-out F1 0.83
+  uPAR:  0.3410            # PROVISIONAL, unvalidated: no tags — mixture gate on the test slide's expert cells
+  FOXP3: 0.3212            # calibrated 2026-10-14 on the R11/R12 boxes + W1 tags of SLIDE-0235 (23 tagged nuclei); leave-one-area-out F1 0.95
+  CD45:  0.0480            # PROVISIONAL, unvalidated: no tags — mixture gate on the test slide's expert cells

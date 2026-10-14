@@ -1,0 +1,15 @@
+# Baseline 1 — Cellpose-DINOv3 (cpdino-vitb) fully fine-tuned on this slide.  Train first: mxseg train -c configs/train_cellpose.yaml
+# then evaluate:  mxseg eval -b configs/baselines/cellpose_ft.yaml [--split test] [--unit region]
+baseline: cellpose
+name: cellpose_ft
+params:
+  variant: runs/cellpose_ft/weights.pt            # min-val/loss weights written by the training run (+ weights.input.json, the composite recipe)
+  diameter: null
+  flow_threshold: 0.4
+  cellprob_threshold: 0.0
+  gpu: true
+  batch_size: 8
+input:                                    # the training input (stored with the weights, which win): LAP2 red, blank, DAPI blue
+  red: LAP2
+  green: null
+  blue: DAPI

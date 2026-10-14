@@ -1,0 +1,53 @@
+# never published: models, weights, predictions, the paper sources and figure panels
+runs/
+weights/
+*.ckpt
+*.pt
+*.pth
+*.bin
+*.safetensors
+LaTex/
+*.tex
+figures/
+figures copy/
+*.pdf
+!media/*.png
+
+# outputs: predictions and rendered figures are regenerated; only the summary tables are versioned
+outputs/*
+!outputs/analysis/
+outputs/analysis/*
+!outputs/analysis/benchmark_*.csv
+!outputs/analysis/*_summary.csv
+!outputs/analysis/*_summary_sd.csv
+!outputs/analysis/neighborhood_per_region.csv
+!outputs/analysis/tumor_immune_*.csv
+!outputs/analysis/gates_calibration.csv
+!outputs/analysis/gates_calibrated.yaml
+
+# data never lives in the repository
+dataset/
+SLIDE-*/
+
+# Python / tooling
+__pycache__/
+*.py[cod]
+*.egg-info/
+build/
+dist/
+.pytest_cache/
+.ruff_cache/
+.mypy_cache/
+.ipynb_checkpoints/
+.venv/
+venv/
+.env
+lightning_logs/
+wandb/
+
+# editors / OS
+.vscode/
+.idea/
+*.swp
+.DS_Store
+Thumbs.db

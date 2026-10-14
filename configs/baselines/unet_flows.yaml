@@ -1,0 +1,15 @@
+# 3-channel U-Net fine-tuned with the Cellpose flow objective (the objective ablation partner of unet.yaml:
+# +0.087 val/f1 over the 3-class protocol with everything else identical).
+# Train: mxseg train -c configs/train_unet.yaml --set unet.objective=flows --name unet_flows
+# then:  mxseg eval -b configs/baselines/unet_flows.yaml [--split test] [--unit region]
+baseline: unet
+name: unet_flows
+params:
+  weights: runs/unet_flows/weights.pt   # min-val/loss weights (objective stored inside; decoded by flow-following)
+  min_area: 15
+  batch_size: 16
+  device: null                          # null = cuda | mps | cpu, auto-detected
+input:                                    # the training input (stored with the weights, which win): LAP2 red, blank, DAPI blue
+  red: LAP2
+  green: null
+  blue: DAPI

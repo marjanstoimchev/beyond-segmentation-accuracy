@@ -1,0 +1,15 @@
+# Baseline 0b — pretrained Cellpose-DINOv3 (cpdino-vitb), zero-shot: the untrained partner of cellpose_ft, so the
+# adaptation delta is measured on one model instead of across two.   mxseg eval -b configs/baselines/cpdino.yaml [--split test] [--unit region]
+baseline: cellpose
+name: cpdino
+params:
+  variant: cpdino-vitb       # cellpose's DINOv3 ViT-B/16 checkpoint (86M), the same DINOv3 lineage as the dinov3_flows row
+  diameter: null             # null = cellpose estimates it
+  flow_threshold: 0.4
+  cellprob_threshold: 0.0
+  gpu: true
+  batch_size: 8
+input:                     # THE SHARED PROTOCOL INPUT: the same marker image every trained row sees (mxseg/inputs.py),
+  red: LAP2                #   on the slide's stored statistics. Zero-shot and prompted rows now differ from the trained
+  green: null              #   ones only in that they were never trained -- not in what they are shown.
+  blue: DAPI

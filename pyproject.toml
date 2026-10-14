@@ -1,0 +1,66 @@
+[build-system]
+requires = ["setuptools>=64"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "mxdata"
+version = "0.3.0"
+description = "Beyond Segmentation Accuracy: an expert-curated MxIF cell-segmentation benchmark (mxdata), twelve segmenters under one leave-slide-out protocol (mxseg), KODIAK pretraining on multiplex tissue, and the four-level biological-fidelity evaluation."
+readme = "README.md"
+requires-python = ">=3.10"
+authors = [{ name = "Marjan Stoimchev", email = "marjanstoimcev@gmail.com" }]
+license = { file = "LICENSE" }
+keywords = ["multiplex-imaging", "spatial-pathology", "cell-segmentation", "foundation-models", "self-supervised-learning", "ome-tiff", "pytorch"]
+
+[project.urls]
+Repository = "https://github.com/marjanstoimchev/beyond-segmentation-accuracy"
+KODIAK = "https://github.com/marjanstoimchev/KODIAK"
+
+# Core = the data-prep layer. Deliberately light: no deep-learning stack is needed to ingest,
+# validate, plan and extract (the manual's "the core installs standalone" rule).
+dependencies = [
+    "numpy>=1.24",
+    "pandas>=2.0",
+    "scipy>=1.10",
+    "tifffile>=2024.1",
+    "imagecodecs>=2024.1",
+    "zarr>=2.16",
+    "opencv-python-headless>=4.8",
+    "PyYAML>=6.0",
+]
+
+[project.optional-dependencies]
+torch = ["torch>=2.1"]                                         # datasets + loaders (mxdata.data)
+baselines = ["torch>=2.1", "cellpose>=4.2", "instanseg-torch", "segmentation-models-pytorch>=0.5", "scikit-image", "tqdm>=4.65"]  # pretrained segmenters + progress (mxseg)
+train = ["torch>=2.1", "lightning>=2.4", "tensorboard", "cellpose>=4.2", "segmentation-models-pytorch>=0.5", "scikit-image", "tqdm>=4.65"]   # Lightning fine-tuning (mxseg.train)
+sam2 = ["SAM-2", "torchvision"]
+sam3 = ["transformers>=5", "torchvision", "Pillow"]
+kodiak = ["torch>=2.1", "lightning>=2.4", "torchvision", "Pillow", "tensorboard"]   # KODIAK pretraining (src/kodiak + vendored src/dinov3)            # SAM 3 (facebook/sam3 via HF) — self-contained in mxseg.baselines._sam3_model                                               # zero-shot baseline; install from the local clone: pip install -e segment-anything-2
+notebooks = ["matplotlib>=3.7", "jupyter", "nbformat", "nbconvert", "ipykernel"]
+dev = ["pytest>=7.0", "ruff>=0.4"]
+all = ["mxdata[torch,baselines,train,notebooks,dev]"]
+
+[project.scripts]
+mxdata = "mxdata.cli:main"
+mxseg = "mxseg.cli:main"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.setuptools.package-data]
+mxdata = ["py.typed"]
+
+[tool.ruff]
+line-length = 110
+extend-exclude = ["src/dinov3"]   # vendored Meta code, kept verbatim
+target-version = "py310"
+src = ["src", "tests"]
+
+[tool.ruff.lint]
+select = ["E", "F", "W", "I"]
+ignore = ["E501"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "-q"
+markers = ["realdata: needs the real slide folder under MXDATA_ROOT (skipped otherwise)"]

@@ -15,7 +15,7 @@
 
 <table align="center" border="0">
   <tr>
-    <td align="center" valign="middle"><a href="https://neurips.cc/virtual/2026/workshop/137513"><img src="media/neurips_logo.png" alt="NeurIPS" height="64"></a></td>
+    <td align="center" valign="middle"><a href="https://neurips.cc/virtual/2026/workshop/137513"><img src="media/neurips_logo.svg" alt="NeurIPS" height="72"></a></td>
     <td align="center" valign="middle" width="36"></td>
     <td align="center" valign="middle"><a href="https://asci.artificialintelligencepathology.org/"><img src="media/asci_logo.png" alt="ASCI workshop" height="92"></a></td>
   </tr>

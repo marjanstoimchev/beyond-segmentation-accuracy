@@ -6,7 +6,7 @@
 
 [![CI](https://github.com/marjanstoimchev/beyond-segmentation-accuracy/actions/workflows/ci.yml/badge.svg)](https://github.com/marjanstoimchev/beyond-segmentation-accuracy/actions/workflows/ci.yml)
 [![License: PolyForm Noncommercial](https://img.shields.io/badge/License-PolyForm%20Noncommercial%201.0.0-orange.svg)](LICENSE)
-[![Paper](https://img.shields.io/badge/NeurIPS%202026-ASCI%20workshop%20(accepted)-b31b1b.svg)](#citation)
+[![Paper](https://img.shields.io/badge/NeurIPS%202026-ASCI%20workshop-b31b1b.svg)](https://openreview.net/forum?id=mD2Cb5rqWd)
 [![Python](https://img.shields.io/badge/python-3.10%2B-blue.svg)](https://www.python.org/)
 [![PyTorch Lightning](https://img.shields.io/badge/PyTorch-Lightning-792ee5.svg)](https://lightning.ai/)
 
@@ -65,8 +65,9 @@ CD8 infiltration zones. Columns: the expert reference and three methods with the
 This is the official implementation of
 
 > **Beyond Segmentation Accuracy: Evaluating Biological Fidelity in Spatial Pathology**
-> Accepted at the *NeurIPS 2026 Workshop on AI at Scale for Clinical Impact: Cancer Pathology Foundation Models (ASCI)*.
-> The author list and the proceedings reference will be published with the camera-ready version.
+> N. Dimitrova, M. Stoimchev, A. Filliol, S. Flowers, P. Romesser, S. Lowe
+> *NeurIPS 2026 Workshop on AI at Scale for Clinical Impact: Cancer Pathology Foundation Models (ASCI)* ·
+> [OpenReview](https://openreview.net/forum?id=mD2Cb5rqWd)
 
 ## Highlights
 
@@ -143,16 +144,15 @@ layout, so everything can be exercised without the data.
 
 ## Citation
 
-The paper is accepted at the NeurIPS 2026 ASCI workshop; the final reference and author list will replace this entry
-when the proceedings are public.
+If this benchmark or code contributes to your work, please cite the paper:
 
 ```bibtex
-@inproceedings{beyondsegmentation2026,
+@inproceedings{dimitrova2026beyond,
   title     = {Beyond Segmentation Accuracy: Evaluating Biological Fidelity in Spatial Pathology},
-  author    = {Stoimchev, Marjan and others},
-  booktitle = {NeurIPS 2026 Workshop on AI at Scale for Clinical Impact: Cancer Pathology Foundation Models (ASCI)},
+  author    = {Nevenka Dimitrova and Marjan Stoimchev and Aveline Filliol and Sara Flowers and Paul Romesser and Scott Lowe},
+  booktitle = {AI at Scale for Clinical Impact: Cancer Pathology Foundation Models (NeurIPS 2026 Workshop)},
   year      = {2026},
-  month     = dec
+  url       = {https://openreview.net/forum?id=mD2Cb5rqWd}
 }
 ```
 

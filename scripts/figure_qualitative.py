@@ -4,7 +4,7 @@
 Two figures, both on the test slide and both consistent with Table 2 by construction:
 
   qual_*.pdf   one window, every reference cell filled with the error class the taxonomy of scripts/figure_errors.py
-               counted it as, so the colours here are the numbers there. Frozen rows omitted.
+               counted it as, so the colours here are the numbers there (Slide 2 = SLIDE-0236 only).
   gained_*.pdf the predictions that cover no reference cell, ranked by how many independent methods place a cell at
                the same spot, each drawn on the tissue with the expert's own contours -- the direct way to ask whether
                a "false positive" is a real nucleus the reference lacks.
@@ -42,9 +42,11 @@ OUT = REPO / "LaTex" / "figures" / "qual"
 KEY, CROP, PANEL = "SLIDE-0236_R02", 384, 1.70
 ZOOM, NZOOM = 104, 6                                                 # px per gained-cell crop, and how many are shown
 
-SHOW = [("cellpose_ft_s0", "Cellpose"), ("kodiakb_flows_s0", "MxIF-SSL B/16"), ("dinov3b_flows_s0", "DINOv3 B/16"),
-        ("unet_flows_s0", "U-Net"), ("kodiak_flows_s0", "MxIF-SSL S/16"), ("dinov3_flows_s0", "DINOv3 S/16"),
-        ("sam3", "SAM 3, prompted"), ("cellpose", "Cellpose, zero-shot")]
+KODIAK = "MxIF-SSL"                                                  # what \kodiak expands to in LaTex/main.tex
+SHOW = [("cellpose_ft_s0", "Cellpose"), ("kodiakb_flows_s0", f"{KODIAK} B/16"), ("dinov3b_flows_s0", "DINOv3 B/16"),
+        ("unet_flows_s0", "U-Net"), ("kodiakb_frozen_s0", f"{KODIAK} B/16, frozen"), ("dinov3b_frozen_s0", "DINOv3 B/16, frozen"),
+        ("sam3", "SAM 3"), ("cellpose", "Cellpose-SAM")]
+SHOW = [(run, label) for run, label in SHOW if (PRED / run / f"{KEY}.npz").is_file()]   # only the rows that exist in outputs/
 FILL = {"correct": "#CBE5D8", "missed": "#7C4DBF", "merged": "#1E7FE0", "split": "#F2820C", "boundary": "#E8B21A"}
 UNSCORED, GAINED, GAINED_FILL = "#EDEFF2", "#E12D39", "#F9D2D6"
 
@@ -101,7 +103,7 @@ def main():
     paths, mx, _ = ingest(slide, None)
     px = float(mx.pixel_size_um or 0.325)
     norms = dataset_norms(REPO / "data" / "processed" if False else __import__("mxdata").DEFAULT_DATASET, cfg.slides, MARKERS)[slide]
-    regions = {r.key: r for r in load_regions(paths, None, cfg.min_area_px)}
+    regions = {r.key: r for r in load_regions(paths, None, cfg.min_area_px) if r.key.startswith(slide + "_")}   # Slide 2 only
     src = LiveSource(mx, list(regions.values()), MARKERS, cfg.level)
 
     # ================= figure 1: the error map, one window ==========================================================

@@ -18,9 +18,10 @@ earlier paper copies illegible. Legends are drawn as their own files and compose
     conda activate dl
     python scripts/figure_spatial.py                    # add --all-methods to include the prompted / zero-shot rows
 
-Methods: the eight rows carried through the downstream pipeline (fine-tuned + frozen S/16). The prompted and zero-shot
-rows of Table 2 are excluded by default -- they are not candidates for a spatial-pathology pipeline, and SAM 2.1 (240
-merged predictions per region, PQ 0.19) alone sets the scale of every axis here.
+Methods: the six rows trained on Slide 1 and carried through the downstream pipeline (U-Net, MxIF-SSL B/16, DINOv3 B/16,
+Cellpose fine-tuned, and the two frozen B/16 probes; three seeds each, runs <row>_s<seed>). The prompted and zero-shot
+rows of Table 2 are excluded by default -- they are not candidates for a spatial-pathology pipeline, and SAM 2.1 alone
+sets the scale of every axis here. Display names follow the macros of main.tex (kodiak -> MxIF-SSL, cpdino -> Cellpose).
 """
 from __future__ import annotations
 
@@ -40,12 +41,16 @@ FID_CSV = REPO / "outputs" / "analysis" / "tumor_immune_fidelity.csv"        # o
 EXPERT_CSV = REPO / "outputs" / "analysis" / "tumor_immune_expert_regions.csv"   # the expert's reading of each region
 
 # ---- shared with scripts/figure_errors.py and \definecolor{m...} in main.tex -----------------------------------------
-ORDER = ["unet_flows", "kodiak_flows", "dinov3_flows", "kodiakb_flows", "dinov3b_flows", "cellpose_ft", "dinov3_frozen", "kodiak_frozen", "cellpose", "sam3", "sam2", "sam3_text"]
-DOWNSTREAM = ORDER[:8]                                                     # the rows Section 5.5 reports
-LABEL = {"unet_flows": "U-Net", "kodiak_flows": "MxIF-SSL S/16", "dinov3_flows": "DINOv3 S/16", "kodiakb_flows": "MxIF-SSL B/16", "dinov3b_flows": "DINOv3 B/16", "cellpose_ft": "Cellpose",
-         "dinov3_frozen": "DINOv3 S/16, frozen", "kodiak_frozen": "MxIF-SSL S/16, frozen", "cellpose": "Cellpose, zero-shot", "sam3": "SAM 3", "sam2": "SAM 2.1", "sam3_text": "SAM 3, text"}
-COLOR = {"unet_flows": "#2A78D6", "kodiak_flows": "#C43E4E", "dinov3_flows": "#B08A2E", "kodiakb_flows": "#7E1F2E", "dinov3b_flows": "#6E5314", "cellpose_ft": "#EB6834", "dinov3_frozen": "#D3BF8C",
-         "kodiak_frozen": "#DF959E", "cellpose": "#8A8A8A", "sam3": "#1BAF7A", "sam2": "#9A86E0", "sam3_text": "#E87BA4"}
+ORDER = ["unet_flows", "kodiakb_flows", "dinov3b_flows", "cellpose_ft", "dinov3b_frozen", "kodiakb_frozen",   # trained on Slide 1
+         "cellpose", "cpdino", "instanseg", "sam3", "sam3_text", "sam2"]                                        # zero-shot / prompted
+DOWNSTREAM = ORDER[:6]                                                     # the rows Section 5.5 reports
+LABEL = {"unet_flows": "U-Net", "kodiakb_flows": "MxIF-SSL B/16", "dinov3b_flows": "DINOv3 B/16", "cellpose_ft": "Cellpose",
+         "dinov3b_frozen": "DINOv3 B/16, frozen", "kodiakb_frozen": "MxIF-SSL B/16, frozen",
+         "cellpose": "Cellpose-SAM", "cpdino": "Cellpose (DINOv3)", "instanseg": "InstanSeg", "sam3": "SAM 3", "sam3_text": "SAM 3, text", "sam2": "SAM 2.1"}
+# frozen rows and the zero-shot Cellpose (DINOv3) are the 55% tint of their full fine-tune colour, as m<name>!55 in main.tex
+COLOR = {"unet_flows": "#2A78D6", "kodiakb_flows": "#7E1F2E", "dinov3b_flows": "#6E5314", "cellpose_ft": "#EB6834",
+         "dinov3b_frozen": "#AFA07E", "kodiakb_frozen": "#B8848C",
+         "cellpose": "#8A8A8A", "cpdino": "#F4AC8F", "instanseg": "#2AA7C9", "sam3": "#1BAF7A", "sam3_text": "#E87BA4", "sam2": "#9A86E0"}
 INK, MUTED, GRID = "#1A1C1F", "#6B7075", "#E4E6E9"
 tick = FuncFormatter(lambda v, _: f"{v:g}")        # 0.5 not 0.50, 0.6 not 0.60
 
@@ -69,7 +74,7 @@ RC = {"font.family": "sans-serif", "font.sans-serif": ["Helvetica Neue", "Helvet
 # Every canvas is trimmed to its content: about 0.02 in of white outside the labels, so the panels sit flush in the grid.
 CONTACT_W = (2.15, 1.50, 1.50)                 # panel widths in inches; + two 0.066 in gaps = 5.30 in, included unscaled
 CONTACT_H = 1.94
-CONTACT_RECT = ([0.322, 0.119, 0.640, 0.866], [0.035, 0.119, 0.905, 0.866])   # with method names, without
+CONTACT_RECT = ([0.415, 0.119, 0.547, 0.866], [0.035, 0.119, 0.905, 0.866])   # with method names ("MxIF-SSL B/16, frozen" needs 0.89 in), without
 PQBIO_W, PQBIO_H = 2.40, 1.78                  # (a) carries the shared y axis
 PQBIO_W2 = 2.12                                # (b) shares it: no y label or tick labels; 2.72 + 2.42 + 0.13 = 5.27 in
 PQBIO_SW, PQBIO_SH = 1.52, 1.50                # bottom row: 3 x 1.72 + two 0.09 in gaps = 5.34 in
@@ -310,7 +315,7 @@ def main(out_dir: Path, methods: list[str]) -> None:
     print(iface.round(1).to_string())
     print("contact F1:", {LABEL[m]: round(v, 3) for m, v in numbers["contact_f1"].items()})
     print("Spearman with contact F1:", numbers["spearman_with_contact_f1"])
-    print(f"wrote contacts_{{a,b,c}}, pqbio_{{a,b,c,d}} and their legends to {out_dir}")
+    print(f"wrote contacts_{{a,b,c}}, pqbio_{{a,b,c,d,e}} and their legends to {out_dir}")
 
 
 if __name__ == "__main__":

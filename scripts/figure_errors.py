@@ -28,11 +28,16 @@ from mxseg.metrics import instance_outcomes, iou_matrix
 
 REPO = Path(__file__).resolve().parents[1]
 RESULTS, PRED = REPO / "results" / "region" / "test", REPO / "outputs" / "region" / "test"
-ORDER = ["unet_flows", "kodiak_flows", "dinov3_flows", "kodiakb_flows", "dinov3b_flows", "cellpose_ft", "dinov3_frozen", "kodiak_frozen", "cellpose", "sam3", "sam2", "sam3_text"]
-LABEL = {"unet_flows": "U-Net", "kodiak_flows": "MxIF-SSL S/16", "dinov3_flows": "DINOv3 S/16", "kodiakb_flows": "MxIF-SSL B/16", "dinov3b_flows": "DINOv3 B/16", "cellpose_ft": "Cellpose", "dinov3_frozen": "DINOv3 S/16, frozen",
-         "kodiak_frozen": "MxIF-SSL S/16, frozen", "cellpose": "Cellpose, zero-shot", "sam3": "SAM 3", "sam2": "SAM 2.1", "sam3_text": "SAM 3, text"}
-COLOR = {"unet_flows": "#2A78D6", "kodiak_flows": "#C43E4E", "dinov3_flows": "#B08A2E", "kodiakb_flows": "#7E1F2E", "dinov3b_flows": "#6E5314", "cellpose_ft": "#EB6834", "dinov3_frozen": "#D3BF8C",
-         "kodiak_frozen": "#DF959E", "cellpose": "#8A8A8A", "sam3": "#1BAF7A", "sam2": "#9A86E0", "sam3_text": "#E87BA4"}
+SLIDE = "SLIDE-0236"                                                           # the paper's primary test slide (Slide 2); SLIDE-0233 is never pooled with it
+# Display order of the rows (trained ViT-B rows, their frozen variants, then the zero-shot rows); only the methods that have
+# results under results/region/test are drawn, in this order, and any method found there but not listed here is appended.
+ORDER = ["unet_flows", "kodiakb_flows", "dinov3b_flows", "cellpose_ft", "kodiakb_frozen", "dinov3b_frozen", "cellpose", "cpdino", "instanseg", "sam3", "sam3_text", "sam2"]
+KODIAK = "MxIF-SSL"                                                            # what \kodiak expands to in LaTex/main.tex
+LABEL = {"unet_flows": "U-Net", "kodiakb_flows": f"{KODIAK} B/16", "dinov3b_flows": "DINOv3 B/16", "cellpose_ft": "Cellpose",
+         "kodiakb_frozen": f"{KODIAK} B/16, frozen", "dinov3b_frozen": "DINOv3 B/16, frozen", "cellpose": "Cellpose-SAM", "cpdino": "Cellpose (DINOv3)",
+         "instanseg": "InstanSeg", "sam3": "SAM 3", "sam3_text": "SAM 3, text", "sam2": "SAM 2.1"}
+COLOR = {"unet_flows": "#2A78D6", "kodiakb_flows": "#7E1F2E", "dinov3b_flows": "#6E5314", "cellpose_ft": "#EB6834", "kodiakb_frozen": "#DF959E", "dinov3b_frozen": "#D3BF8C",
+         "cellpose": "#8A8A8A", "cpdino": "#5A5A5A", "instanseg": "#3C9D9B", "sam3": "#1BAF7A", "sam3_text": "#E87BA4", "sam2": "#9A86E0"}
 TAXO = {"missed": "#8E5BE0", "merged": "#1E90FF", "split": "#FF7F0E", "boundary": "#F2C230"}
 TAXO_LABEL = {"missed": "missed", "merged": "merged", "split": "split", "boundary": "poor boundary"}
 AREA_BINS = [0, 15, 25, 35, 50, 70, 200]
@@ -72,11 +77,14 @@ def main(out_dir: Path):
     for m in sorted(RESULTS.glob("*/metrics.json")):
         name = m.parent.name; mm = SEED_RE.match(name)
         runs.append({"run": name, "method": mm.group(1) if mm else name, "seed": int(mm.group(2)) if mm else None})
-    methods = [m for m in ORDER if any(r["method"] == m for r in runs)]
+    found = {r["method"] for r in runs}
+    methods = [m for m in ORDER if m in found] + sorted(found - set(ORDER))     # listed order first, then anything new in results/
+    for m in methods:
+        LABEL.setdefault(m, m); COLOR.setdefault(m, "#444444")
     by = {m: sorted([r for r in runs if r["method"] == m], key=lambda r: (r["seed"] is None, r["seed"])) for m in methods}
 
     cfg = load_config(REPO / "configs" / "dataset.yaml")
-    slide = cfg.split.test_slides[0] if getattr(cfg, "split", None) and cfg.split.test_slides else "SLIDE-0236"
+    slide = SLIDE                                                              # Slide 2 only: the second test slide is never pooled in
     paths, mx, _ = ingest(slide, None)
     px = float(mx.pixel_size_um or 0.325)
     regions = load_regions(paths, None, cfg.min_area_px)
@@ -84,7 +92,7 @@ def main(out_dir: Path):
     gt = {}
     for r in regions:
         rs = src.load(r.key); labels, ignore = apply_qc_policy(rs.labels, rs.flags, "ignore_wrong"); gt[r.key] = (labels, ignore)
-    keys = sorted(gt)
+    keys = sorted(k for k in gt if k.startswith(SLIDE + "_"))
 
     # ---- verdicts of every run on every region; per-cell tables ------------------------------------------------------------
     cells = []                                                                 # one row per scored reference cell per run
@@ -149,7 +157,7 @@ def main(out_dir: Path):
     def save(fig, name):
         fig.savefig(out_dir / f"{name}.pdf"); fig.savefig(out_dir / f"{name}.png", dpi=250); plt.close(fig)
 
-    fig = plt.figure(figsize=(2.15, H)); a = fig.add_axes([0.430, 0.2, 0.555, 0.78])   # room for "MxIF-SSL S/16, frozen"
+    fig = plt.figure(figsize=(2.15, H)); a = fig.add_axes([0.430, 0.2, 0.555, 0.78])   # room for "MxIF-SSL B/16, frozen"
     y = np.arange(len(methods))[::-1]; left = np.zeros(len(methods))
     for cls in ("missed", "merged", "split", "boundary"):
         v = frac[cls + "_pct"].values
@@ -185,7 +193,7 @@ def main(out_dir: Path):
     x = np.arange(n_methods + 1); cols = ["#8E5BE0"] + ["#C7CBD1"] * (n_methods - 1) + ["#1BAF7A"]
     d.bar(x, 100 * cons, color=cols, width=0.72, zorder=3)
     d.errorbar(x, 100 * cons, yerr=[100 * (cons - cons_lo), 100 * (cons_hi - cons)], fmt="none", ecolor=INK, elinewidth=0.6, capsize=1.2, zorder=4)
-    # 13 bars in 1.2 in: label only the three the text quotes, or the numbers collide into one another
+    # N+1 bars in 1.2 in: label only the three the text quotes, or the numbers collide into one another
     for xi in sorted({0, int(np.argmax(cons)), n_methods}):
         d.text(xi, 100 * cons_hi[xi] + 1.4, f"{100 * cons[xi]:.1f}", ha="center", va="bottom", fontsize=5.0,
                fontweight="bold" if xi in (0, n_methods) else "normal", color=INK if xi in (0, n_methods) else MUTED)
@@ -201,7 +209,7 @@ def main(out_dir: Path):
                "recall_by_area": {m: dict(zip([str(i) for i in rec_area.columns], rec_area.loc[m].round(3))) for m in methods}, "n_area": {str(k): int(v) for k, v in n_area.items()},
                "recall_by_nn": {m: dict(zip([str(i) for i in rec_nn.columns], rec_nn.loc[m].round(3))) for m in methods}, "n_nn": {str(k): int(v) for k, v in n_nn.items()},
                "consensus_pct": [round(100 * v, 2) for v in cons], "consensus_pct_by_seed": (100 * cons_by_seed).round(2).tolist(), "never_found_any_run_pct": round(100 * never_any, 2),
-               "n_runs": len(runs), "n_scored": int(tax[tax.run == tax.run.iloc[0]].scored.sum())}
+               "n_runs": len(runs), "n_methods": n_methods, "slide": slide, "regions": keys, "labels": {m: LABEL[m] for m in methods}, "n_scored": int(tax[tax.run == tax.run.iloc[0]].scored.sum())}
     (out_dir / "errors.json").write_text(json.dumps(numbers, indent=1, default=str))
     print(frac.round(1).to_string()); print("recall by area:\n", rec_area.round(2).to_string()); print("n per area bin:", n_area.to_dict())
     print("recall by NN distance:\n", rec_nn.round(2).to_string()); print("n per NN bin:", n_nn.to_dict())

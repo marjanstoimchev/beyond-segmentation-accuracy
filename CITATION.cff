@@ -1,22 +1,38 @@
 cff-version: 1.2.0
-message: >-
-  If this code or benchmark contributes to your work, please cite the paper below. The paper is accepted at the
-  NeurIPS 2026 Workshop on AI at Scale for Clinical Impact: Cancer Pathology Foundation Models (ASCI); the full
-  author list and the proceedings reference will be added here when they are public.
+message: "If this benchmark or code contributes to your work, please cite the paper below."
 title: "Beyond Segmentation Accuracy: Evaluating Biological Fidelity in Spatial Pathology"
 type: software
 authors:
+  - family-names: Dimitrova
+    given-names: Nevenka
   - family-names: Stoimchev
     given-names: Marjan
-    email: marjanstoimcev@gmail.com
+  - family-names: Filliol
+    given-names: Aveline
+  - family-names: Flowers
+    given-names: Sara
+  - family-names: Romesser
+    given-names: Paul
+  - family-names: Lowe
+    given-names: Scott
 repository-code: "https://github.com/marjanstoimchev/beyond-segmentation-accuracy"
 license: PolyForm-Noncommercial-1.0.0
 preferred-citation:
   type: conference-paper
   title: "Beyond Segmentation Accuracy: Evaluating Biological Fidelity in Spatial Pathology"
   authors:
+    - family-names: Dimitrova
+      given-names: Nevenka
     - family-names: Stoimchev
       given-names: Marjan
-  collection-title: "NeurIPS 2026 Workshop on AI at Scale for Clinical Impact: Cancer Pathology Foundation Models (ASCI)"
+    - family-names: Filliol
+      given-names: Aveline
+    - family-names: Flowers
+      given-names: Sara
+    - family-names: Romesser
+      given-names: Paul
+    - family-names: Lowe
+      given-names: Scott
+  collection-title: "AI at Scale for Clinical Impact: Cancer Pathology Foundation Models (NeurIPS 2026 Workshop)"
   year: 2026
-  month: 12
+  url: "https://openreview.net/forum?id=mD2Cb5rqWd"

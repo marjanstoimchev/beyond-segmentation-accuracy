@@ -1,8 +1,11 @@
 <div align="center">
 
-# Beyond Segmentation Accuracy
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset="media/logo_dark.png">
+  <img src="media/logo_light.png" alt="Beyond Segmentation Accuracy" width="880">
+</picture>
 
-**Evaluating biological fidelity in spatial pathology: an expert-curated multiplex-immunofluorescence cell-segmentation benchmark, one leave-slide-out protocol for twelve segmenters, and a four-level evaluation that follows every method's cells into phenotypes, neighborhoods and tumor–immune organization**
+**An expert-curated multiplex-immunofluorescence cell-segmentation benchmark, one leave-slide-out protocol for twelve segmenters, and a four-level evaluation that follows every method's cells into phenotypes, neighborhoods and tumor–immune organization**
 
 [![CI](https://github.com/marjanstoimchev/beyond-segmentation-accuracy/actions/workflows/ci.yml/badge.svg)](https://github.com/marjanstoimchev/beyond-segmentation-accuracy/actions/workflows/ci.yml)
 [![License: PolyForm Noncommercial](https://img.shields.io/badge/License-PolyForm%20Noncommercial%201.0.0-orange.svg)](LICENSE)
@@ -84,6 +87,39 @@ This is the official implementation of
 - **Reproducible from the configs**: every table and figure comes from `configs/`, `scripts/finetune_all.sh` and the
   notebooks; the metrics of every run are versioned here.
 
+## Data
+
+Three CellDIVE whole-slide images of mouse colorectal cancer, one nine-marker panel (DAPI, LAP2, PanCK, CD45, CD3, CD4,
+CD8, FOXP3, uPAR) at 0.325 µm per pixel, every annotated region segmented by HALO and then reviewed cell by cell by an
+expert, who flags HALO's errors. Models learn only from confirmed cells; flagged cells are neither targets nor false
+positives.
+
+<table align="center">
+  <tr>
+    <td align="center"><img src="media/slide1.png" height="150" alt="Slide 1"><br><sub><b>Slide 1</b> · development · 16 regions</sub></td>
+    <td align="center"><img src="media/slide2.png" height="150" alt="Slide 2"><br><sub><b>Slide 2</b> · test · 6 regions</sub></td>
+    <td align="center"><img src="media/slide3.png" height="150" alt="Slide 3"><br><sub><b>Slide 3</b> · second test · 4 fields</sub></td>
+  </tr>
+</table>
+<p align="center"><sub>CD8 red · PanCK green · DAPI blue. Annotated regions outlined by role (grey training, amber validation, magenta test); * = expert-reviewed; 1 mm scale bars.</sub></p>
+
+| Slide | Role under the protocol | Regions | Cells (HALO) | Reviewed | Flagged <i>wrong</i> | Confirmed | Patches (labeled / unlabeled) |
+|---|---|---|---|---|---|---|---|
+| Slide 1 (SLIDE-0235) | development: pretraining, training, model selection (R14 + R15), gate calibration | 16 | 21,657 | 16 of 16 | 4,668 | 16,985 | 628 / 4,478 |
+| Slide 2 (SLIDE-0236) | test, scored once per finished run | 6 | 7,662 | 6 of 6 | 1,510 | 6,152 | 259 / 4,103 |
+| Slide 3 (SLIDE-0233) | second test, segmentation level | 4 | 3,451 | 3 of 4 | 937 | 1,672 | 72 / — |
+
+**Phenotype labels** (never used for segmentation training or scoring): on Slide 1, one 1,024² window tagged exhaustively
+in the annotation tool (1,006 PanCK⁺, 40 T cells, 26 CD4⁺, 12 CD8⁺), which calibrates the gates; on Slide 2, four such
+windows (1,982 PanCK⁺, 188 T cells, 147 CD4⁺, 71 CD8⁺, 80 Treg), held out; on Slide 3, bounding boxes over two reviewed
+fields (756 boxes: CD3⁺, CD4⁺, CD8⁺, FOXP3⁺, PanCK⁺).
+
+**Access.** The slides, annotations and review tables are not distributed with the code: the images are private
+clinical research data. Researchers who wish to use the benchmark should contact **Nevenka Dimitrova**, corresponding
+author of the paper, for a data-use agreement. The pipeline runs unchanged on any CellDIVE + HALO export placed in the
+layout of [docs/DATA.md](docs/DATA.md) (one folder per slide: OME-TIFFs, HALO GeoJSON layers, review tables, phenotype
+labels), and the test suite builds a synthetic slide in that layout, so everything here can be exercised without the data.
+
 ## Install and run
 
 ```bash
@@ -134,13 +170,6 @@ The full tables, Slide 3, and the downstream levels are in [docs/RESULTS.md](doc
 
 Instance accuracy and the biological endpoint rank the methods differently: the three best segmenters span 0.50–0.62 on
 contact fidelity, and zero-shot rows with far lower PQ keep as many contacts as the best fine-tuned ones.
-
-## Data
-
-The CellDIVE slides and the expert annotations are not distributed with the code. [docs/DATA.md](docs/DATA.md) documents
-the on-disk layout the pipeline expects (one folder per slide: OME-TIFFs, HALO GeoJSON layers, review tables, phenotype
-labels), so the pipeline runs unchanged on any CellDIVE + HALO export; the test suite builds a synthetic slide in that
-layout, so everything can be exercised without the data.
 
 ## Citation
 

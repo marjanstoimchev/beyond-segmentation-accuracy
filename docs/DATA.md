@@ -8,8 +8,11 @@
 | SLIDE-0236 ("Slide 2") | test | 6 | 7,675 | all 6 | 1,510 |
 | SLIDE-0233 ("Slide 3") | test | 4 immune-rich fields (one HALO export split by field) | 3,451 | 3 of 4 | 937 |
 
-Nine markers on every slide: DAPI, LAP2, PanCK, CD45, CD3, CD4, CD8, FOXP3, uPAR (`configs/panel.yaml`). The slides are not
-distributed with the code; the layout below is what the pipeline expects of any CellDIVE + HALO export.
+Nine markers on every slide: DAPI, LAP2, PanCK, CD45, CD3, CD4, CD8, FOXP3, uPAR (`configs/panel.yaml`).
+
+**Access.** The slides, annotations and review tables are private clinical research data and are not distributed with the
+code. Contact **Nevenka Dimitrova**, corresponding author of the paper, for a data-use agreement. The layout below is what the
+pipeline expects of any CellDIVE + HALO export, and `make test` exercises every stage on a synthetic slide in that layout.
 
 ## On disk (one folder per slide under `MXDATA_ROOT`)
 

@@ -12,9 +12,6 @@ authors = [{ name = "Marjan Stoimchev", email = "marjanstoimcev@gmail.com" }]
 license = { file = "LICENSE" }
 keywords = ["multiplex-imaging", "spatial-pathology", "cell-segmentation", "foundation-models", "self-supervised-learning", "ome-tiff", "pytorch"]
 
-[project.urls]
-Repository = "https://github.com/marjanstoimchev/beyond-segmentation-accuracy"
-KODIAK = "https://github.com/marjanstoimchev/KODIAK"
 
 # Core = the data-prep layer. Deliberately light: no deep-learning stack is needed to ingest,
 # validate, plan and extract (the manual's "the core installs standalone" rule).
@@ -43,6 +40,9 @@ all = ["mxdata[torch,baselines,train,notebooks,dev]"]
 [project.scripts]
 mxdata = "mxdata.cli:main"
 mxseg = "mxseg.cli:main"
+[project.urls]
+Repository = "https://github.com/marjanstoimchev/beyond-segmentation-accuracy"
+KODIAK = "https://github.com/marjanstoimchev/KODIAK"
 
 [tool.setuptools.packages.find]
 where = ["src"]

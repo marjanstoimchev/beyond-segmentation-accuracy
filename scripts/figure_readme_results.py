@@ -53,54 +53,54 @@ def load():
 
 def draw(d, mode):
     t = THEME[mode]
-    plt.rcParams.update({"font.family": "DejaVu Sans", "font.size": 10.5, "axes.edgecolor": t["grid"], "axes.linewidth": 0.8,
+    plt.rcParams.update({"font.family": "DejaVu Sans", "font.size": 13, "axes.edgecolor": t["grid"], "axes.linewidth": 0.8,
                          "xtick.color": t["muted"], "ytick.color": t["ink"], "axes.labelcolor": t["muted"], "text.color": t["ink"]})
     cols = [("f1_s2", "1 · Segmentation\nF1 at IoU 0.5", (0.15, 0.95), "{:.3f}"), ("pheno", "2 · Phenotype\nagreement, %", (82, 98), "{:.1f}"),
             ("edges", "3 · Neighborhood\nedge recall", (0.55, 0.97), "{:.2f}"), ("niche", "4a · Niche\nagreement, %", (83, 94), "{:.1f}"),
             ("contact", "4b · Tumor–CD8\ncontact F1", (-0.04, 0.68), "{:.2f}")]
-    fig = plt.figure(figsize=(16.5, 7.2), dpi=170); fig.patch.set_facecolor(t["surface"])
-    widths = [2.0, 1, 1, 1, 1]; left = 0.235; gap = 0.022; avail = 0.99 - left - gap * (len(cols) - 1); tot = sum(widths)
+    fig = plt.figure(figsize=(14.5, 8.6), dpi=170); fig.patch.set_facecolor(t["surface"])
+    widths = [2.1, 1, 1, 1, 1]; left = 0.265; gap = 0.03; avail = 0.99 - left - gap * (len(cols) - 1); tot = sum(widths)
     y = np.arange(len(d))[::-1]
     x0 = left
     for k, (col, title, lim, fmt) in enumerate(cols):
         w = avail * widths[k] / tot
-        ax = fig.add_axes([x0, 0.12, w, 0.68]); x0 += w + gap
+        ax = fig.add_axes([x0, 0.115, w, 0.675]); x0 += w + gap
         ax.set_facecolor(t["surface"])
         for sp in ("top", "right", "left"): ax.spines[sp].set_visible(False)
         ax.grid(axis="x", color=t["grid"], lw=0.8, zorder=0); ax.set_axisbelow(True)
-        span = lim[1] - lim[0]; pad = 0.42 if col == "f1_s2" else 0.30                     # a value column at the right of each panel
+        span = lim[1] - lim[0]; pad = 0.62 if col == "f1_s2" else 0.34                     # a value column at the right of each panel
         ax.set_xlim(lim[0], lim[1] + pad * span); ax.set_xticks([t for t in ax.get_xticks() if lim[0] <= t <= lim[1]])
         ax.set_ylim(-0.7, len(d) - 0.3); ax.set_yticks(y)
-        ax.set_yticklabels([LABEL[m] for m in d.index] if k == 0 else [""] * len(d), fontsize=10.5)
-        ax.tick_params(axis="y", length=0); ax.tick_params(axis="x", length=3, labelsize=9)
-        ax.set_title(title, loc="left", fontsize=10.5, fontweight="bold", color=t["ink"], pad=9, linespacing=1.15)
+        ax.set_yticklabels([LABEL[m] for m in d.index] if k == 0 else [""] * len(d), fontsize=13)
+        ax.tick_params(axis="y", length=0); ax.tick_params(axis="x", length=3, labelsize=11)
+        ax.set_title(title, loc="left", fontsize=13, fontweight="bold", color=t["ink"], pad=10, linespacing=1.15)
         colors = [t["group"][GROUP[m]] for m in d.index]
         v = d[col].values
         if col == "f1_s2":                                              # slide 2 filled, slide 3 hollow, joined by a hairline
             v3 = d["f1_s3"].values
             for yi, a, b, c in zip(y, v, v3, colors):
                 ax.plot([a, b], [yi, yi], color=c, lw=1.4, alpha=0.55, zorder=2)
-            ax.scatter(v3, y, s=70, facecolor=t["surface"], edgecolor=colors, linewidth=1.8, zorder=3)
-            ax.scatter(v, y, s=70, color=colors, edgecolor=t["surface"], linewidth=1.2, zorder=4)
+            ax.scatter(v3, y, s=95, facecolor=t["surface"], edgecolor=colors, linewidth=2.0, zorder=3)
+            ax.scatter(v, y, s=95, color=colors, edgecolor=t["surface"], linewidth=1.2, zorder=4)
             for yi, a, b in zip(y, v, v3):
-                ax.text(lim[1] + pad * span, yi, f"{a:.3f}  {b:.3f}", va="center", ha="right", fontsize=8.6, color=t["muted"])
-            ax.text(lim[1] + pad * span, len(d) - 0.25, "S2    S3", va="bottom", ha="right", fontsize=8, color=t["muted"])
+                ax.text(lim[1] + pad * span, yi, f"{a:.3f}  {b:.3f}", va="center", ha="right", fontsize=11, color=t["muted"])
+            ax.text(lim[1] + pad * span, len(d) - 0.25, "S2       S3", va="bottom", ha="right", fontsize=10, color=t["muted"])
         else:
-            ax.scatter(v, y, s=70, color=colors, edgecolor=t["surface"], linewidth=1.2, zorder=4)
+            ax.scatter(v, y, s=95, color=colors, edgecolor=t["surface"], linewidth=1.2, zorder=4)
             for yi, a in zip(y, v):
-                ax.text(lim[1] + pad * span, yi, fmt.format(a), va="center", ha="right", fontsize=8.6, color=t["muted"])
+                ax.text(lim[1] + pad * span, yi, fmt.format(a), va="center", ha="right", fontsize=11, color=t["muted"])
     # legend: the four groups + the slide markers
     g = t["group"]
-    handles = [Line2D([], [], marker="o", ls="", ms=8, color=g[k], label=k) for k in ("fine-tuned", "frozen", "prompted", "released")]
-    handles += [Line2D([], [], marker="o", ls="", ms=8, color=t["muted"], label="Slide 2 (test)"),
-                Line2D([], [], marker="o", ls="", ms=8, markerfacecolor=t["surface"], markeredgecolor=t["muted"], markeredgewidth=1.8, label="Slide 3 (second test, reviewed fields)")]
-    leg = fig.legend(handles=handles, loc="lower left", bbox_to_anchor=(0.235, 0.0), ncol=6, frameon=False, fontsize=9.5,
-                     handletextpad=0.4, columnspacing=1.6)
+    handles = [Line2D([], [], marker="o", ls="", ms=10, color=g[k], label=k) for k in ("fine-tuned", "frozen", "prompted", "released")]
+    handles += [Line2D([], [], marker="o", ls="", ms=10, color=t["muted"], label="Slide 2 (test)"),
+                Line2D([], [], marker="o", ls="", ms=10, markerfacecolor=t["surface"], markeredgecolor=t["muted"], markeredgewidth=2.0, label="Slide 3 (reviewed fields)")]
+    leg = fig.legend(handles=handles, loc="lower left", bbox_to_anchor=(0.265, 0.0), ncol=6, frameon=False, fontsize=12,
+                     handletextpad=0.4, columnspacing=1.3)
     for txt in leg.get_texts(): txt.set_color(t["muted"])
-    fig.text(0.01, 0.955, "Twelve segmenters on the held-out slides, mean over three seeds where a row has them", fontsize=12,
+    fig.text(0.01, 0.955, "Twelve segmenters on the held-out slides, mean over three seeds where a row has them", fontsize=15,
              fontweight="bold", color=t["ink"], ha="left", va="center")
     fig.text(0.01, 0.915, "Level 1 on both held-out slides (S2 = Slide 2, S3 = the reviewed fields of Slide 3), levels 2–4 on Slide 2: the levels do not order the methods alike.",
-             fontsize=9.6, color=t["muted"], ha="left", va="center")
+             fontsize=12, color=t["muted"], ha="left", va="center")
     fig.savefig(OUT / f"results_{mode}.png", facecolor=t["surface"]); plt.close(fig)
 
 

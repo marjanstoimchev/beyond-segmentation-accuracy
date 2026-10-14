@@ -103,16 +103,64 @@ positives.
 </table>
 <p align="center"><sub>CD8 red · PanCK green · DAPI blue. Annotated regions outlined by role (grey training, amber validation, magenta test); * = expert-reviewed; 1 mm scale bars.</sub></p>
 
-| Slide | Role under the protocol | Regions | Cells (HALO) | Reviewed | Flagged <i>wrong</i> | Confirmed | Patches (labeled / unlabeled) |
-|---|---|---|---|---|---|---|---|
-| Slide 1 (SLIDE-0235) | development: pretraining, training, model selection (R14 + R15), gate calibration | 16 | 21,657 | 16 of 16 | 4,668 | 16,985 | 628 / 4,478 |
-| Slide 2 (SLIDE-0236) | test, scored once per finished run | 6 | 7,662 | 6 of 6 | 1,510 | 6,152 | 259 / 4,103 |
-| Slide 3 (SLIDE-0233) | second test, segmentation level | 4 | 3,451 | 3 of 4 | 937 | 1,672 | 72 / — |
+<table align="center">
+  <thead>
+    <tr>
+      <th rowspan="2" align="left">Slide</th>
+      <th rowspan="2" align="left">Role under the protocol</th>
+      <th colspan="2">Regions</th>
+      <th colspan="3">Cells (HALO objects)</th>
+      <th colspan="2">256² patches</th>
+    </tr>
+    <tr>
+      <th>all</th><th>reviewed</th>
+      <th>all</th><th>confirmed</th><th>flagged <i>wrong</i></th>
+      <th>labeled</th><th>unlabeled</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><b>Slide 1</b><br><sub>SLIDE-0235</sub></td>
+      <td><b>development</b><br><sub>pretraining · training · model selection (R14, R15) · gate calibration</sub></td>
+      <td align="right">16</td><td align="right">16</td>
+      <td align="right">21,657</td><td align="right">16,985</td><td align="right">4,668</td>
+      <td align="right">628</td><td align="right">4,478</td>
+    </tr>
+    <tr>
+      <td><b>Slide 2</b><br><sub>SLIDE-0236</sub></td>
+      <td><b>test</b><br><sub>all four levels, scored once per finished run</sub></td>
+      <td align="right">6</td><td align="right">6</td>
+      <td align="right">7,662</td><td align="right">6,152</td><td align="right">1,510</td>
+      <td align="right">259</td><td align="right">4,103</td>
+    </tr>
+    <tr>
+      <td><b>Slide 3</b><br><sub>SLIDE-0233</sub></td>
+      <td><b>second test</b><br><sub>segmentation level, immune-rich fields</sub></td>
+      <td align="right">4</td><td align="right">3</td>
+      <td align="right">3,451</td><td align="right">1,672</td><td align="right">937</td>
+      <td align="right">72</td><td align="right">—</td>
+    </tr>
+    <tr>
+      <td><b>Total</b></td><td></td>
+      <td align="right">26</td><td align="right">25</td>
+      <td align="right">32,770</td><td align="right">24,809</td><td align="right">7,115</td>
+      <td align="right">959</td><td align="right">8,581</td>
+    </tr>
+  </tbody>
+</table>
+<p align="center"><sub>Confirmed and flagged cells are those of the reviewed regions; Slide 3's unreviewed field (842 cells) and four Slide 1 contours without a review row are scored nowhere. Unlabeled patches are tissue outside the annotated regions, used for pretraining only.</sub></p>
 
-**Phenotype labels** (never used for segmentation training or scoring): on Slide 1, one 1,024² window tagged exhaustively
-in the annotation tool (1,006 PanCK⁺, 40 T cells, 26 CD4⁺, 12 CD8⁺), which calibrates the gates; on Slide 2, four such
-windows (1,982 PanCK⁺, 188 T cells, 147 CD4⁺, 71 CD8⁺, 80 Treg), held out; on Slide 3, bounding boxes over two reviewed
-fields (756 boxes: CD3⁺, CD4⁺, CD8⁺, FOXP3⁺, PanCK⁺).
+<table align="center">
+  <thead>
+    <tr><th align="left">Phenotype labels</th><th align="left">Slide</th><th align="left">Where</th><th>PanCK⁺</th><th>T cell</th><th>CD4⁺ T</th><th>CD8⁺ T</th><th>Treg</th><th align="left">Used for</th></tr>
+  </thead>
+  <tbody>
+    <tr><td>tags on tool polygons</td><td>1</td><td>one 1,024² window in R1</td><td align="right">1,006</td><td align="right">40</td><td align="right">26</td><td align="right">12</td><td align="right">—</td><td>gate calibration</td></tr>
+    <tr><td>tags on tool polygons</td><td>2</td><td>four 1,024² windows</td><td align="right">1,982</td><td align="right">188</td><td align="right">147</td><td align="right">71</td><td align="right">80</td><td>held out with the slide</td></tr>
+    <tr><td>bounding boxes</td><td>3</td><td>two reviewed fields</td><td align="right">311</td><td align="right">193</td><td align="right">123</td><td align="right">103</td><td align="right">26</td><td>held out with the slide</td></tr>
+  </tbody>
+</table>
+<p align="center"><sub>A label locates a cell; it never defines a boundary, and none of these enter segmentation training or scoring.</sub></p>
 
 **Access.** The slides, annotations and review tables are not distributed with the code: the images are private
 clinical research data. Researchers who wish to use the benchmark should contact **Nevenka Dimitrova**, corresponding

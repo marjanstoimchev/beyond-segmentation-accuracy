@@ -23,22 +23,22 @@ region of Slide 1 expert-reviewed). The sources are `results/region/test/<run>/`
 | InstanSeg, zero-shot | 1 | 0.766 | 0.620 | 0.313 | 0.556 | 0.856 | 0.693 | 0.810 |
 | SAM 2.1, prototype prompts | 1 | 0.270 | 0.156 | 0.049 | 0.168 | 0.301 | 0.245 | 0.813 |
 
-**Slide 3** (SLIDE-0233, 4 immune-rich fields, 2,329 confirmed cells)
+**Slide 3** (SLIDE-0233, its 3 expert-reviewed fields, 1,672 confirmed cells; field 1 carries a partial review and is scored nowhere)
 
-| Method | F1@0.5 | AP@0.5:0.9 | PQ | Precision | Recall |
-|---|---|---|---|---|---|
-| Cellpose (DINOv3 B/16), fine-tuned | 0.797 ± 0.003 | 0.445 ± 0.008 | 0.640 ± 0.005 | 0.859 | 0.743 |
-| U-Net | 0.786 ± 0.002 | 0.397 ± 0.008 | 0.612 ± 0.005 | 0.861 | 0.723 |
-| KODIAK B/16, fine-tuned | 0.784 ± 0.007 | 0.422 ± 0.009 | 0.623 ± 0.007 | 0.872 | 0.712 |
-| DINOv3 B/16, fine-tuned | 0.765 ± 0.010 | 0.372 ± 0.009 | 0.589 ± 0.008 | 0.863 | 0.688 |
-| DINOv3 B/16, frozen | 0.754 ± 0.002 | 0.353 ± 0.009 | 0.575 ± 0.004 | 0.868 | 0.667 |
-| KODIAK B/16, frozen | 0.726 ± 0.009 | 0.328 ± 0.005 | 0.551 ± 0.006 | 0.850 | 0.633 |
-| SAM 3, exemplar prompts | 0.734 | 0.324 | 0.550 | 0.810 | 0.672 |
-| SAM 3, text prompt | 0.719 | 0.264 | 0.509 | 0.729 | 0.709 |
-| Cellpose (DINOv3), zero-shot | 0.662 | 0.230 | 0.465 | 0.604 | 0.732 |
-| InstanSeg, zero-shot | 0.657 | 0.266 | 0.486 | 0.767 | 0.574 |
-| Cellpose-SAM, zero-shot | 0.655 | 0.234 | 0.465 | 0.586 | 0.741 |
-| SAM 2.1, prototype prompts | 0.233 | 0.045 | 0.148 | 0.291 | 0.194 |
+| Method | F1@0.5 | AP@0.5:0.9 | PQ | Precision | Recall | Count ratio |
+|---|---|---|---|---|---|---|
+| Cellpose (DINOv3 B/16), fine-tuned | 0.869 ± 0.003 | 0.515 | 0.700 | 0.870 | 0.868 | 0.998 |
+| KODIAK B/16, fine-tuned | 0.859 ± 0.006 | 0.496 | 0.687 | 0.886 | 0.834 | 0.942 |
+| U-Net | 0.859 ± 0.003 | 0.465 | 0.673 | 0.871 | 0.847 | 0.973 |
+| DINOv3 B/16, fine-tuned | 0.842 ± 0.010 | 0.444 | 0.655 | 0.878 | 0.809 | 0.921 |
+| DINOv3 B/16, frozen | 0.830 ± 0.004 | 0.419 | 0.638 | 0.881 | 0.785 | 0.891 |
+| KODIAK B/16, frozen | 0.800 ± 0.010 | 0.390 | 0.613 | 0.860 | 0.748 | 0.870 |
+| SAM 3, exemplar prompts | 0.805 | 0.381 | 0.608 | 0.823 | 0.788 | 0.958 |
+| SAM 3, text prompt | 0.784 | 0.308 | 0.560 | 0.740 | 0.834 | 1.128 |
+| InstanSeg, zero-shot | 0.722 | 0.309 | 0.536 | 0.778 | 0.674 | 0.866 |
+| Cellpose (DINOv3), zero-shot | 0.709 | 0.260 | 0.502 | 0.604 | 0.856 | 1.416 |
+| Cellpose-SAM, zero-shot | 0.700 | 0.264 | 0.502 | 0.587 | 0.867 | 1.476 |
+| SAM 2.1, prototype prompts | 0.263 | 0.050 | 0.166 | 0.296 | 0.237 | 0.799 |
 
 Readings: the fine-tuned Cellpose leads on every metric and its lead widens at strict IoU, so its boundaries are tighter,
 not only its detections. KODIAK beats its DINOv3 initialization by about 0.014 F1 and 0.03 PQ on both slides — the
@@ -125,4 +125,4 @@ preserved by almost every method (ρ = 0.79–0.90 with the expert).
   row started from that encoder.
 * Under the 10-epoch budget, U-Net, DINOv3 B/16 and the frozen DINOv3 keep the last epoch for two of three seeds, so
   their validation loss was still falling (notebook 06).
-* Slide 3's field 1 is unreviewed; its three reviewed fields carry the Slide 3 numbers.
+* Slide 3's field 1 carries only a partial review and is scored nowhere; its three reviewed fields carry the Slide 3 numbers (`results/…/metrics.json` pools all ten held-out regions and is never quoted).

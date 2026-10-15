@@ -37,8 +37,7 @@
 > **Research and non-commercial use only.** This code is released under the
 > [PolyForm Noncommercial License 1.0.0](LICENSE): academic, research and other non-commercial use is free;
 > **commercial use of any kind requires written permission.** For a commercial or other separate license of the
-> software, contact **Marjan Stoimchev** (marjanstoimcev@gmail.com); for access to the data, contact Nevenka Dimitrova
-> (see [Data](#data)). If this benchmark or code contributes to your work, please **cite the paper** (see [Citation](#citation)).
+> software, and for access to the data, contact **Nevenka Dimitrova**, corresponding author of the paper (see [Data](#data)). If this benchmark or code contributes to your work, please **cite the paper** (see [Citation](#citation)).
 
 **The problem.** Multiplex immunofluorescence (MxIF) resolves cellular identity, state and spatial organization within
 tumor tissue, but every downstream representation of the tumor microenvironment — marker quantification, phenotypes,
@@ -300,7 +299,7 @@ released under the [PolyForm Noncommercial License 1.0.0](LICENSE). In short:
 - **Allowed**: use, modification and redistribution for research, teaching, personal and other non-commercial purposes,
   including by universities, research institutes and hospitals doing research.
 - **Not allowed**: any commercial use (products, services, consulting, commercial R&D) without a separate, written
-  license. For commercial or other licensing of the software, contact **Marjan Stoimchev** (marjanstoimcev@gmail.com).
+  license. For commercial or other licensing of the software, contact **Nevenka Dimitrova**, corresponding author of the paper.
 - **Data**: the slides and annotations are not covered by this license and are not distributed; for data access, contact
   Nevenka Dimitrova (see [Data](#data)).
 - **Please cite and acknowledge** the paper in publications, reports or software that build on this code.

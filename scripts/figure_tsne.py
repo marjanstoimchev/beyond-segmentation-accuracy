@@ -5,7 +5,7 @@ Illustrative only: the claim is carried by the leave-one-region-out probes, whic
 proves. Everything that could favour one side is held fixed -- the same tokens, the same labels, the same PCA width,
 the same perplexity and seed -- so the panels differ only in the features underneath.
 
-Three feature sets x two labellings: MxIF-SSL tokens, the DINOv3 initialization they continue from, and the marker
+Three feature sets x two labellings: KODIAK tokens, the DINOv3 initialization they continue from, and the marker
 baseline (per-token mean and s.d. of the three input channels), coloured by reference niche and by cell lineage.
 
     conda activate dl
@@ -40,8 +40,8 @@ NICHE_COLOR = {"Immune-infiltrated": "#C43E4E", "Epithelial core": "#2A78D6",
                "Interface": "#9A86E0", "Stromal / other": "#B9BDC4"}
 LIN_COLOR = {"Epithelial": "#3FA96B", "Immune": "#E08A3C", "Other": "#C9CDD3"}
 # the leave-one-region-out probe scores this figure illustrates (balanced accuracy, Section A.6.1)
-PROBE = {("MxIF-SSL", "niche"): 0.529, ("DINOv3", "niche"): 0.483, ("markers", "niche"): 0.507,
-         ("MxIF-SSL", "lineage"): 0.650, ("DINOv3", "lineage"): 0.625, ("markers", "lineage"): 0.698}
+PROBE = {("KODIAK", "niche"): 0.529, ("DINOv3", "niche"): 0.483, ("markers", "niche"): 0.507,
+         ("KODIAK", "lineage"): 0.650, ("DINOv3", "lineage"): 0.625, ("markers", "lineage"): 0.698}
 INK, MUTED = "#1A1C1F", "#6B7075"
 
 matplotlib.rcParams.update({"font.family": "sans-serif",
@@ -99,7 +99,7 @@ def main():
     dino = DinoV3Encoder(**ARCH).eval()
     ds = torch.load(REPO / M["pretrained_path"], map_location="cpu", weights_only=False)
     dino.load_state_dict(ds.get("model", ds), strict=True)
-    ENC = {"MxIF-SSL": lambda xb: kodiak.teacher_encoder.forward_full(xb)[1],
+    ENC = {"KODIAK": lambda xb: kodiak.teacher_encoder.forward_full(xb)[1],
            "DINOv3":   lambda xb: dino.forward_full(xb)[1]}
     print(f"encoders ready (epoch {int(ck['epoch'])})", flush=True)
 
@@ -156,7 +156,7 @@ def main():
 
     unit = lambda a: a / np.maximum(np.linalg.norm(a, axis=1, keepdims=True), 1e-8)
     EMB = {}
-    for tag in ("MxIF-SSL", "DINOv3", "markers"):
+    for tag in ("KODIAK", "DINOv3", "markers"):
         Z = X[tag][LAB]
         Z = unit(Z) if tag != "markers" else (Z - Z.mean(0)) / np.maximum(Z.std(0), 1e-6)
         if Z.shape[1] > PCA_DIM:
@@ -171,14 +171,14 @@ def main():
     from sklearn.metrics import balanced_accuracy_score
     from sklearn.model_selection import cross_val_predict
     check = {}
-    for tag in ("MxIF-SSL", "DINOv3", "markers"):
+    for tag in ("KODIAK", "DINOv3", "markers"):
         for target in ("niche", "lineage"):
             y = TOK[target].values[LAB]
             pred = cross_val_predict(KNeighborsClassifier(30), EMB[tag], y, cv=5)
             check[f"{tag}|{target}"] = round(float(balanced_accuracy_score(y, pred)), 3)
     print("  2-D embedding kNN balanced accuracy (vs probe):", flush=True)
     for target in ("niche", "lineage"):
-        row = {t: (check[f"{t}|{target}"], PROBE[(t, target)]) for t in ("MxIF-SSL", "DINOv3", "markers")}
+        row = {t: (check[f"{t}|{target}"], PROBE[(t, target)]) for t in ("KODIAK", "DINOv3", "markers")}
         print(f"    {target:8s} " + "  ".join(f"{t}: 2D {a:.3f} / probe {b:.3f}" for t, (a, b) in row.items()), flush=True)
     np.savez(OUT / "tsne_embeddings.npz", **{f"emb_{t}": EMB[t] for t in EMB},
              niche=TOK["niche"].values[LAB].astype(str), lineage=TOK["lineage"].values[LAB].astype(str))
@@ -186,7 +186,7 @@ def main():
     PANEL = 1.62
     for target, cmap in (("niche", NICHE_COLOR), ("lineage", LIN_COLOR)):
         y = TOK[target].values[LAB]
-        for tag in ("MxIF-SSL", "DINOv3", "markers"):
+        for tag in ("KODIAK", "DINOv3", "markers"):
             v = EMB[tag]
             f = plt.figure(figsize=(PANEL, PANEL)); ax = f.add_axes([0, 0, 1, 1])
             for cls, col in cmap.items():

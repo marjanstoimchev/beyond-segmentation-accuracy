@@ -32,7 +32,7 @@ SLIDE = "SLIDE-0236"                                                           #
 # Display order of the rows (trained ViT-B rows, their frozen variants, then the zero-shot rows); only the methods that have
 # results under results/region/test are drawn, in this order, and any method found there but not listed here is appended.
 ORDER = ["unet_flows", "kodiakb_flows", "dinov3b_flows", "cellpose_ft", "kodiakb_frozen", "dinov3b_frozen", "cellpose", "cpdino", "instanseg", "sam3", "sam3_text", "sam2"]
-KODIAK = "MxIF-SSL"                                                            # what \kodiak expands to in LaTex/main.tex
+KODIAK = "KODIAK"                                                            # what \kodiak expands to in LaTex/main.tex
 LABEL = {"unet_flows": "U-Net", "kodiakb_flows": f"{KODIAK} B/16", "dinov3b_flows": "DINOv3 B/16", "cellpose_ft": "Cellpose",
          "kodiakb_frozen": f"{KODIAK} B/16, frozen", "dinov3b_frozen": "DINOv3 B/16, frozen", "cellpose": "Cellpose-SAM", "cpdino": "Cellpose (DINOv3)",
          "instanseg": "InstanSeg", "sam3": "SAM 3", "sam3_text": "SAM 3, text", "sam2": "SAM 2.1"}
@@ -157,7 +157,7 @@ def main(out_dir: Path):
     def save(fig, name):
         fig.savefig(out_dir / f"{name}.pdf"); fig.savefig(out_dir / f"{name}.png", dpi=250); plt.close(fig)
 
-    fig = plt.figure(figsize=(2.15, H)); a = fig.add_axes([0.430, 0.2, 0.555, 0.78])   # room for "MxIF-SSL B/16, frozen"
+    fig = plt.figure(figsize=(2.15, H)); a = fig.add_axes([0.430, 0.2, 0.555, 0.78])   # room for "KODIAK B/16, frozen"
     y = np.arange(len(methods))[::-1]; left = np.zeros(len(methods))
     for cls in ("missed", "merged", "split", "boundary"):
         v = frac[cls + "_pct"].values

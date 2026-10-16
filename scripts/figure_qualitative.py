@@ -42,7 +42,7 @@ OUT = REPO / "LaTex" / "figures" / "qual"
 KEY, CROP, PANEL = "SLIDE-0236_R02", 384, 1.70
 ZOOM, NZOOM = 104, 6                                                 # px per gained-cell crop, and how many are shown
 
-KODIAK = "MxIF-SSL"                                                  # what \kodiak expands to in LaTex/main.tex
+KODIAK = "KODIAK"                                                  # what \kodiak expands to in LaTex/main.tex
 SHOW = [("cellpose_ft_s0", "Cellpose"), ("kodiakb_flows_s0", f"{KODIAK} B/16"), ("dinov3b_flows_s0", "DINOv3 B/16"),
         ("unet_flows_s0", "U-Net"), ("kodiakb_frozen_s0", f"{KODIAK} B/16, frozen"), ("dinov3b_frozen_s0", "DINOv3 B/16, frozen"),
         ("sam3", "SAM 3"), ("cellpose", "Cellpose-SAM")]
